@@ -3,6 +3,7 @@ from flask import Flask, render_template, request
 import cv2
 import numpy as np
 import base64
+from FER.model import FacialExpressionModel
 
 app = Flask(__name__)
 
@@ -35,14 +36,14 @@ def upload_file():
     else:
         faceDetected = True
         num_faces = len(faces)
-        
+
         # Draw a rectangle
         for item in faces:
             draw_rectangle(image, item['rect'])
-        
+
         # Save
         #cv2.imwrite(filename, image)
-        
+
         # In memory
         image_content = cv2.imencode('.jpg', image)[1].tostring()
         encoded_image = base64.encodestring(image_content)
@@ -52,7 +53,7 @@ def upload_file():
 
 # ----------------------------------------------------------------------------------
 # Detect faces using OpenCV
-# ----------------------------------------------------------------------------------  
+# ----------------------------------------------------------------------------------
 def detect_faces(img):
     '''Detect face in an image'''
 
@@ -88,6 +89,18 @@ def detect_faces(img):
 def draw_rectangle(img, rect):
     '''Draw a rectangle on the image'''
     (x, y, w, h) = rect
+    model = FacialExpressionModel("FER/model.json", "FER/model_weights.h5")
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    fr = img
+    gray_fr = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+
+    fc = gray_fr[y:y+h, x:x+w]
+
+    roi = cv2.resize(fc, (48, 48))
+    pred = model.predict_emotion(roi[np.newaxis, :, :, np.newaxis])
+
+    cv2.putText(img, pred, (x, y), font, 1, (0, 255, 255), 2)
     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
 if __name__ == "__main__":
