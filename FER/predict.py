@@ -12,7 +12,7 @@ from tensorflow.keras.models import model_from_json
 #set_session(session)
 
 
-class FacialExpressionModel(object):
+class Model(object):
     # List of Emotions
     EMOTIONS_LIST = ["Angry", "Disgust",
                      "Fear", "Happy",
@@ -33,4 +33,4 @@ class FacialExpressionModel(object):
 #        global session
 #        set_session(session)
         self.preds = self.loaded_model.predict(img)
-        return FacialExpressionModel.EMOTIONS_LIST[np.argmax(self.preds)]
+        return Model.EMOTIONS_LIST[np.argmax(self.preds)]

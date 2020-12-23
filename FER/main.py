@@ -1,111 +1,55 @@
-import os
-from flask import Flask, render_template, request
-import cv2
+import os, cv2
 import numpy as np
-import base64
-from FER.model import FacialExpressionModel
+from flask import Blueprint, render_template, request, flash, redirect
+from FER.edit import rw_image, detect_faces
 
-app = Flask(__name__)
+fer = Blueprint('fer', __name__)
+#UPLOAD_FOLDER = os.path.basename('uploads')
+#fer.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-UPLOAD_FOLDER = os.path.basename('uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
-@app.route("/")
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@fer.route("/")
 def start_page():
     print("Start")
-    return render_template('index.html')
+    return render_template('fer.html')
 
-@app.route('/upload', methods=['POST'])
+@fer.route('/', methods=['POST'])
 def upload_file():
-    if request.files.get('image', None):
-        file = request.files['image']
+    file = request.files['image']
+    if file.filename == '':
+        flash('No image selected', 'danger')
+        return redirect(request.url)
+
+    if file and allowed_file(file.filename):
+        # Read image
+        image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
+
+        # Detect faces
+        faces = detect_faces(image)
+
+        if len(faces) == 0:
+            flash('Sorry, No face Detected', 'danger')
+            return redirect(request.url)
+        else:
+            num_faces = len(faces)
+            to_send = rw_image(image, faces)
+
+        flash('Yes! '+str(num_faces)+' face(s) detected!', 'success')
+        return render_template('fer.html', image_to_show=to_send)
     else:
-        return render_template('index.html', noimg=True)
+        flash('Please upload supported formats, e.g. png, jpg or jpeg', 'danger')
+        return redirect(request.url)
 
     # Save file
     #filename = 'static/' + file.filename
     #file.save(filename)
 
-    # Read image
-    image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
-
-    # Detect faces
-    faces = detect_faces(image)
-
-    if len(faces) == 0:
-        faceDetected = False
-        num_faces = 0
-        to_send = ''
-    else:
-        faceDetected = True
-        num_faces = len(faces)
-
-        # Draw a rectangle
-        for item in faces:
-            draw_rectangle(image, item['rect'])
-
-        # Save
-        #cv2.imwrite(filename, image)
-
-        # In memory
-        image_content = cv2.imencode('.jpg', image)[1].tostring()
-        encoded_image = base64.encodestring(image_content)
-        to_send = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
-
-    return render_template('index.html', faceDetected=faceDetected, num_faces=num_faces, image_to_show=to_send, init=True)
-
-# ----------------------------------------------------------------------------------
-# Detect faces using OpenCV
-# ----------------------------------------------------------------------------------
-def detect_faces(img):
-    '''Detect face in an image'''
-
-    faces_list = []
-
-    # Convert the test image to gray scale (opencv face detector expects gray images)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Load OpenCV face detector (LBP is faster)
-    face_cascade = cv2.CascadeClassifier('FER/haarcascade_frontalface_default.xml')
-
-    # Detect multiscale images (some images may be closer to camera than others)
-    # result is a list of faces
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5);
-
-    # If not face detected, return empty list
-    if  len(faces) == 0:
-        return faces_list
-
-    for i in range(0, len(faces)):
-        (x, y, w, h) = faces[i]
-        face_dict = {}
-        face_dict['face'] = gray[y:y + w, x:x + h]
-        face_dict['rect'] = faces[i]
-        faces_list.append(face_dict)
-
-    # Return the face image area and the face rectangle
-    return faces_list
-# ----------------------------------------------------------------------------------
-# Draw rectangle on image
-# according to given (x, y) coordinates and given width and heigh
-# ----------------------------------------------------------------------------------
-def draw_rectangle(img, rect):
-    '''Draw a rectangle on the image'''
-    (x, y, w, h) = rect
-    model = FacialExpressionModel("FER/model.json", "FER/model_weights.h5")
-    font = cv2.FONT_HERSHEY_SIMPLEX
-
-    fr = img
-    gray_fr = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
-
-    fc = gray_fr[y:y+h, x:x+w]
-
-    roi = cv2.resize(fc, (48, 48))
-    pred = model.predict_emotion(roi[np.newaxis, :, :, np.newaxis])
-
-    cv2.putText(img, pred, (x, y), font, 1, (0, 255, 255), 2)
-    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 2)
+    
 
 if __name__ == "__main__":
     # Only for debugging while developing
-    app.run(host='0.0.0.0', debug=True, port=80)
+    fer.run(host='0.0.0.0', debug=True, port=80)
