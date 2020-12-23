@@ -1,15 +1,15 @@
 # Importing Libraries
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
 
 from tensorflow.keras.models import model_from_json
-from tensorflow.python.keras.backend import set_session
+#from tensorflow.python.keras.backend import set_session
 
 # Initializing TF Session
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.15
-session = tf.compat.v1.Session(config=config)
-set_session(session)
+#config = tf.compat.v1.ConfigProto()
+#config.gpu_options.per_process_gpu_memory_fraction = 0.15
+#session = tf.compat.v1.Session(config=config)
+#set_session(session)
 
 
 class FacialExpressionModel(object):
@@ -30,7 +30,7 @@ class FacialExpressionModel(object):
 
     # Function to predict emotion
     def predict_emotion(self, img):
-        global session
-        set_session(session)
+#        global session
+#        set_session(session)
         self.preds = self.loaded_model.predict(img)
         return FacialExpressionModel.EMOTIONS_LIST[np.argmax(self.preds)]
