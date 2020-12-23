@@ -30,6 +30,14 @@
 </header>
 
 <div class="text-center">
+    {% if noimg %}
+        <div class="alert alert-danger" style="margin-top:18px;">
+            <strong>No Image Selected</strong>
+        </div>
+    {% endif %}
+</div>
+
+<div class="text-center">
     {% if init %}
         {% if faceDetected %}
             <div class="alert alert-success" style="margin-top:18px;">

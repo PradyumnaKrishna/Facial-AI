@@ -17,7 +17,10 @@ def start_page():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    file = request.files['image']
+    if request.files.get('image', None):
+        file = request.files['image']
+    else:
+        return render_template('index.html', noimg=True)
 
     # Save file
     #filename = 'static/' + file.filename
