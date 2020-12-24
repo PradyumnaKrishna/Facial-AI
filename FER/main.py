@@ -1,45 +1,50 @@
 import os, cv2
 import numpy as np
 from flask import Blueprint, render_template, request, flash, redirect
-from FER.edit import rw_image, detect_faces
+from FER.edit import rw_image
 
 fer = Blueprint('fer', __name__)
-#UPLOAD_FOLDER = os.path.basename('uploads')
-#fer.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Image file extensions
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
+# Check for the file uploaded is an image
 def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Main Page
 @fer.route("/")
 def start_page():
     print("Start")
     return render_template('fer.html')
 
+# Upload Image (Post Form)
 @fer.route('/', methods=['POST'])
 def upload_file():
+    # Load the file
     file = request.files['image']
+    
+    # Check 'the file is upladed?'
     if file.filename == '':
         flash('No image selected', 'danger')
         return redirect(request.url)
 
+    # Check for the file uploaded and is an image
     if file and allowed_file(file.filename):
-        # Read image
-        image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
+        # Takes the No of faces and Edited Image
+        num_faces, to_send = rw_image(file)
 
-        # Detect faces
-        faces = detect_faces(image)
-
-        if len(faces) == 0:
-            flash('Sorry, No face Detected', 'danger')
+        # If No of faces 0 then print 'No Face Detected'
+        if num_faces == 0:
+            flash('Sorry, No face detected', 'danger')
             return redirect(request.url)
+        
+        # Else Print No of Faces and the image
         else:
-            num_faces = len(faces)
-            to_send = rw_image(image, faces)
-
-        flash('Yes! '+str(num_faces)+' face(s) detected!', 'success')
-        return render_template('fer.html', image_to_show=to_send)
+            flash('Yes! '+str(num_faces)+' face(s) detected!', 'success')
+            return render_template('fer.html', image_to_show=to_send)
+    
+    # If not an image
     else:
         flash('Please upload supported formats, e.g. png, jpg or jpeg', 'danger')
         return redirect(request.url)
@@ -47,8 +52,6 @@ def upload_file():
     # Save file
     #filename = 'static/' + file.filename
     #file.save(filename)
-
-    
 
 if __name__ == "__main__":
     # Only for debugging while developing

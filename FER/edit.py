@@ -42,31 +42,49 @@ def detect_faces(img):
 def edit_image(img, rect):
     '''Draw a rectangle(s) on the image and write their suitable emotions'''
     (x, y, w, h) = rect
+
+    # Load the Model
     predictor = Model("FER/model.json", "FER/model_weights.h5")
     font = cv2.FONT_HERSHEY_SIMPLEX
 
-    fr = img
-    gray_fr = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+    # Convert image into Grayscale
+    gray_fr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+    # Select only Face
     fc = gray_fr[y:y+h, x:x+w]
 
+    # Convert image into 48x48 and predict Emotion
     roi = cv2.resize(fc, (48, 48))
     emotion = predictor.predict_emotion(roi[np.newaxis, :, :, np.newaxis])
 
+    # Draw Rectange and Write Emotion
     cv2.putText(img, emotion, (x, y), font, 1, (0, 255, 255), 2)
     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
-def rw_image(image, faces):
-    # Edit the image
-    for item in faces:
-        edit_image(image, item['rect'])
+# ----------------------------------------------------------------------------------
+# Read and Write Process for image
+# ----------------------------------------------------------------------------------
+def rw_image(file):
+    # Read image
+    image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
 
-    # Save
-    #cv2.imwrite(filename, image)
+    # Detect faces
+    faces = detect_faces(image)
 
-    # In memory
-    image_content = cv2.imencode('.jpg', image)[1].tostring()
-    encoded_image = base64.encodestring(image_content)
-    to_send = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
+    # If no face detected return 0 and None
+    if len(faces) == 0:
+        return 0, None
+    else:
+        # Edit the image
+        for item in faces:
+            edit_image(image, item['rect'])
 
-    return to_send
+        # Save
+        #cv2.imwrite(filename, image)
+
+        # Process Image for Printing
+        image_content = cv2.imencode('.jpg', image)[1].tostring()
+        encoded_image = base64.encodestring(image_content)
+        to_send = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
+
+        return len(faces), to_send
