@@ -16,7 +16,7 @@ Haarcascade is used to detect the faces in the image, which is allowed to use my
 
 Because Heroku Weak Servers, To run TensorFlow with Flask, I neeed to go for Google App Engine Flexible. It gave the ability to run it and its working fine* under 1 CPU and 1GB Ram.
 
-Give a try at [https://facial-ai.appspot.com](https://facial-ai.appspot.com)
+Give a try at <https://facial-ai.appspot.com>, use some [test](test) cases and rate our accuracy.
 
 ## Docs and References
 
