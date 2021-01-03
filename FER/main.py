@@ -1,5 +1,3 @@
-import os, cv2
-import numpy as np
 from flask import Blueprint, render_template, request, flash, redirect
 from FER.edit import rw_image
 
