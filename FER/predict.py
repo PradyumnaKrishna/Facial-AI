@@ -32,5 +32,5 @@ class Model(object):
     def predict_emotion(self, img):
         global session
         set_session(session)
-        self.preds = self.loaded_model.predict(img)
-        return Model.EMOTIONS_LIST[np.argmax(self.preds)]
+        emotion = self.loaded_model.predict(img)
+        return Model.EMOTIONS_LIST[np.argmax(emotion)]

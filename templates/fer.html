@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>FER | Facial AI</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>FER | Facial AI</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 
 <body>
 
-<div class = "container">
-    <div class = "starter-template">
+<div class="container">
+    <div class="starter-template">
         <h1>Face Expression Detection</h1>
-        <p class = "lead"> Try uploading an image to see if a face is detected </p>
+        <p class="lead"> Try uploading an image to see if a face is detected </p>
         <p> Face Expression Detection using TensorFlow</p>
         <p> Image size limit: 2 MB </p>
         <p> By Pradyumna Krishna © 2020 </p>
@@ -19,7 +21,7 @@
 </div>
 
 <header class="navbar">
-    <form action="/FER" method="post" enctype="multipart/form-data" >
+    <form action="/FER" method="post" enctype="multipart/form-data">
         <div align="center">
             <label class="btn btn-default btn-file">
                 Browse <input type="file" name="image" style="display: none;" autocomplete="off" required>
@@ -38,14 +40,14 @@
                 </div>
                 {% if category == 'success' %}
                     <div>
-                        <img src=" {{ image_to_show }}">
+                        <img src=" {{ image_to_show }}" alt="Predicted">
                     </div>
                 {% endif %}
             {% endfor %}
-         {% endif %}
+        {% endif %}
     {% endwith %}
 </div>
 
 </body>
-</html>
 
+</html>

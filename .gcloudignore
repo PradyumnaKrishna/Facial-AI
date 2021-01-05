@@ -26,7 +26,6 @@ instance/*
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
-__pycache__/
 *.py[cod]
 *$py.class
 
@@ -184,3 +183,5 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+.idea
