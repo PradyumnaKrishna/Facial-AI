@@ -6,15 +6,15 @@
 <p align="center"><b>
 THIS REPOSITORY IS LICENSED UNDER <a href="https://github.com/PradyumnaKrishna/Facial-AI/blob/main/LICENSE.md">MIT LICENSE</a></b></p>
 
-</br>
+<br>
 
-This is a very simple Flask app that let's the user upload a image and detects how many (if any) faces are there and their respective emotions in the picture.
+This is a very simple Flask app that let's the user upload an image and detects how many (if any) faces are there and their respective emotions in the picture.
 
 Haarcascade is used to detect the faces in the image, which is allowed to use my TensorFlow model to predict the emotion of human. I trained it in my repository [FER](https://github.com/PradyumnaKrishna/FER).
 
 ## Hosted on Google App Engine
 
-Because Heroku Weak Servers, To run TensorFlow with Flask, I neeed to go for Google App Engine Flexible. It gave the ability to run it and its working fine* under 1 CPU and 1GB Ram.
+Because Heroku Weak Servers, To run TensorFlow with Flask, I need to go for Google App Engine Flexible. It gave the ability to run it and its working fine* under 1 CPU and 1 GB Ram.
 
 Give a try at <https://facial-ai.appspot.com>, use some [test](test) cases and rate our accuracy.
 

@@ -11,7 +11,7 @@ The web application hosted at <https://facial-ai.appspot.com> has simple UI. Con
     <img alt="Web App" src="img/Web%20App.png">
 </p>
 
-First button `Browse` browses the file need to be uplaoded and `Upload your image` button uploads it. Its a Simple Form where `Browse` button picks the file and `Upload your image` submit the form.
+First button `Browse` browses the file need to be uploaded and `Upload your image` button uploads it. It's a Simple Form where `Browse` button picks the file and `Upload your image` submit the form.
 
 Error handling is used to maintain the web application running and display the error message. These error messages are:
 - No image selected
@@ -22,7 +22,7 @@ Error handling is used to maintain the web application running and display the e
     <img alt="An Error" src="img/Error%20Message.png">
 </p>
 
-If there is no error and image get uploaded successfully, web application predicts the emotion and draw the rectangle on the face(s) as shown in image.
+If there is no error and image get uploaded successfully, web application predicts the emotion and draw the rectangle on the face(s) as shown in the image.
 
 <p align="center">
     <img alt="Prediction" src="img/Prediction.png">
