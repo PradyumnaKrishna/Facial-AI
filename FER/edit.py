@@ -70,6 +70,14 @@ def rw_image(file):
     # Read image
     image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
 
+    # Resizing Factor
+    f1, f2 = 1200 / image.shape[1], 600 / image.shape[0]
+    f = min(f1, f2)
+
+    # Resize Image
+    dim = (int(image.shape[1] * f), int(image.shape[0] * f))
+    image = cv2.resize(image, dim)
+
     # Detect faces
     faces = detect_faces(image)
 
