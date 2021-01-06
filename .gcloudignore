@@ -12,6 +12,13 @@
 # below:
 .git
 .gitignore
+key.json*
+.travis.yml
+test.py
+requirements-test.txt
+Docs/
+test/
+Procfile
 env
 
 # Python pycache:

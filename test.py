@@ -2,7 +2,8 @@ import main
 
 get = {
     '/': 302,
-    '/FER/': 200
+    '/FER/': 200,
+    '/anywhere/': 404
 }
 
 

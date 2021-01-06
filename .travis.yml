@@ -1,7 +1,22 @@
 language: python
+
 python:
   - 3.7
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_4409d9b2903a_key -iv $encrypted_4409d9b2903a_iv
+    -in key.json.enc -out key.json -d
+
 install:
   - pip install -r requirements-test.txt
+
 script:
   - python test.py
+
+deploy:
+  provider: gae
+  project: facial-ai
+  keyfile: key.json
+  on:
+    branch: main
+    tags: true
