@@ -14,9 +14,14 @@ script:
   - python test.py
 
 deploy:
-  provider: gae
-  project: facial-ai
-  keyfile: key.json
-  on:
-    branch: main
-    tags: true
+  - provider: gae
+    project: facial-ai
+    keyfile: key.json
+    on:
+      branch: main
+      tags: true
+  
+  - provider: azure_web_apps
+    skip_cleanup: true
+    on:
+      branch: main
