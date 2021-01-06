@@ -29,4 +29,4 @@ If there is no error and image get uploaded successfully, web application predic
 </p>
 
 **Back: [Getting Started](Getting%20Started.md)**<br>
-**Next: [Coming Soon](#)**
+**Next: [Continuous Integration and Continuous Delivery](CI-CD.md)**

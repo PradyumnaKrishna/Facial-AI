@@ -13,6 +13,9 @@ install:
 script:
   - python test.py
 
+after_script:
+  - rm -rf Docs test Procfile
+
 deploy:
   - provider: gae
     project: facial-ai
@@ -20,8 +23,8 @@ deploy:
     on:
       branch: main
       tags: true
-  
+
   - provider: azure_web_apps
-    skip_cleanup: true
     on:
       branch: main
+      tags: true
