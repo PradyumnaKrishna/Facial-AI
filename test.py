@@ -1,4 +1,5 @@
 import main
+import sys
 
 get = {
     '/': 302,
@@ -21,6 +22,14 @@ def test_index():
     with open('test/jon_snow.jpg', 'rb') as img2:
         r = client.post('/FER/', data={'image': img2})
         assert r.status_code == 200
+
+    try:
+        if str(sys.argv[1]) == 'run':
+            print("running server")
+            main.app.run()
+    except IndexError:
+        return
+
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ def rw_image(file):
 
     # Resizing Factor
     f1, f2 = 1200 / image.shape[1], 600 / image.shape[0]
-    f = min(f1, f2)
+    f = min(f1, f2, 1)
 
     # Resize Image
     dim = (int(image.shape[1] * f), int(image.shape[0] * f))
