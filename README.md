@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/PradyumnaKrishna/PradyumnaKrishna/master/logo.svg" alt="Logo" title="Logo" align="right" height="50" width="50"/>
 
-# Facial-AI [![Version][Version-Badge]][Version] [![Build Status][Build-Badge]][Travis-CI] [![License: MIT][License-Badge]](LICENSE.md)
+# Facial-AI [![Version][Version-Badge]][Version] [![Build Status][Build-Badge]][Travis-CI] [![Coverage][Codecov-Badge]][Codecov] [![License: MIT][License-Badge]](LICENSE.md)
 
 <br>
 
@@ -56,6 +56,10 @@ If any issues and suggestions to me, you can create an [issue](https://github.co
 error occurs.</sup>
 
 [Build-Badge]:          https://www.travis-ci.com/PradyumnaKrishna/Facial-AI.svg?branch=main
+
+[Codecov-Badge]:        https://codecov.io/gh/PradyumnaKrishna/Facial-AI/branch/main/graph/badge.svg?token=SDFIZWFE3V
+
+[Codecov]:              https://codecov.io/gh/PradyumnaKrishna/Facial-AI
 
 [Travis-CI]:            https://www.travis-ci.com/PradyumnaKrishna/Facial-AI
 

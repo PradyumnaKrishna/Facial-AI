@@ -1,5 +1,6 @@
 import main
 import sys
+import unittest
 
 get = {
     '/': 302,
@@ -7,30 +8,36 @@ get = {
     '/anywhere/': 404
 }
 
+test = {
+    'test/octocat.jpg': 302,
+    'test/jon_snow.jpg': 200,
+}
 
-def test_index():
-    main.app.testing = True
-    client = main.app.test_client()
 
-    for link, response in get.items():
-        assert client.get(link).status_code == response
+class Test(unittest.TestCase):
 
-    with open('test/octocat.jpg', 'rb') as img1:
-        r = client.post('/FER/', data={'image': img1})
-        assert r.status_code == 302
+    def test_index(self):
+        main.app.testing = True
+        client = main.app.test_client()
 
-    with open('test/jon_snow.jpg', 'rb') as img2:
-        r = client.post('/FER/', data={'image': img2})
-        assert r.status_code == 200
+        for link, response in get.items():
+            self.assertEqual(client.get(link).status_code, response)
 
-    try:
-        if str(sys.argv[1]) == 'run':
-            print("running server")
-            main.app.run()
-    except IndexError:
-        return
+        for file, response in test.items():
+            with open(file, 'rb') as img:
+                r = client.post('/FER/', data={'image': img})
+                self.assertEqual(r.status_code, response)
+        
+        r = client.post('/FER/')
+        print(r.status_code)
 
+        try:
+            if str(sys.argv[1]) == 'run':
+                print("running server")
+                main.app.run()
+        except IndexError:
+            return
 
 
 if __name__ == "__main__":
-    test_index()
+    unittest.main()

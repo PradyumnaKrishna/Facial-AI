@@ -9,9 +9,16 @@ before_install:
 
 install:
   - pip install -r requirements-test.txt
+  - pip install coverage
 
 script:
-  - python test.py
+  - coverage run test.py
+
+after_success:
+  bash <(curl -s https://codecov.io/bash)
+
+before_deploy:
+  bash ./scripts/before_deploy.sh
 
 deploy:
   - provider: gae
@@ -23,5 +30,5 @@ deploy:
 
   - provider: azure_web_apps
     verbose: true
-    cleanup: false
+    cleanup: true
     on: main
