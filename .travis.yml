@@ -3,12 +3,8 @@ language: python
 python:
   - 3.7
 
-before_install:
-  - openssl aes-256-cbc -K $encrypted_4409d9b2903a_key -iv $encrypted_4409d9b2903a_iv
-    -in key.json.enc -out key.json -d
-
 install:
-  - pip install -r requirements-test.txt
+  - pip install -r requirements.txt
   - pip install coverage
 
 script:
@@ -16,16 +12,3 @@ script:
 
 after_success:
   bash <(curl -s https://codecov.io/bash)
-
-deploy:
-  - provider: gae
-    project: facial-ai
-    keyfile: key.json
-    on:
-      branch: main
-      tags: true
-
-  - provider: azure_web_apps
-    verbose: true
-    cleanup: true
-    on: main
