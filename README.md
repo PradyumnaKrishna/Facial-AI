@@ -14,18 +14,25 @@ their respective emotions in the picture.
 Haarcascade is used to detect the faces in the image, which is allowed to use my TensorFlow model to predict the emotion
 of human. I trained it in my repository [FER](https://github.com/PradyumnaKrishna/FER).
 
-## CI/CD using Travis-CI
+## Get Started
 
-Recently, I learned about Travis-CI and want to configure it for this repository. Now whenever I commit it test my code
-using test.py and deploy it to Google App Service and Azure App Service when I push tagged commit.
-[Read more](Docs/CI-CD.md)
+Use Docker or Virtual Environment to run this web application.
+To get started:
 
-## Hosted on Google App Engine
+1. Clone the repository
+   ```bash
+   git clone https://github.com/PradyumnaKrishna/Facial-AI
+   ```
+3. Install Dependencies
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+4. Run the flask server
+   ```bash
+   python3 main.py
+   ```
 
-Because Heroku Weak Servers, To run TensorFlow with Flask, I need to go for Google App Engine Flexible. It gave the
-ability to run it and its working fine* under 1 CPU and 1 GB Ram (now under 0.5 CPU and 0.5 GB Ram).
-
-Give a try at <https://facial-ai.appspot.com>, use some [test](test) cases and rate our accuracy.
+Read more information or instructions about the setup at [docs](docs/Setup.md).
 
 ## Hosted on Azure App Service
 
@@ -34,11 +41,19 @@ work fine* under their free tier.
 
 Give a try at <http://facial-ai.azurewebsites.net>, use some [test](test) cases and rate our accuracy.
 
+*I used Docker Image to for deployment last time, I was using git but due to some problem I switched over it.
+
+## CI/CD using Travis-CI
+
+Recently, I learned about Travis-CI and want to configure it for this repository. Now whenever I commit it test my code
+using test.py and deploy it to Google App Service and Azure App Service when I push tagged commit.
+[Read more](Docs/CI-CD.md)
+
 ## Docs and References
 
-- [Read these Docs](Docs/The%20Web%20Application.md) to understand this web application.
-- [Read these Docs](Docs/Getting%20Started.md) to learn how to use this repository as a template.
-- [Read these Docs](Docs/CI-CD.md) to deploy your own web application on Platform as a Service(PaaS).
+- [Read these Docs](docs/Setup.md) to learn how to use this run this web application.
+- [Read these Docs](docs/The-Web-Application.md) to understand this web application.
+- Learn About [Docker](https://www.freecodecamp.org/news/the-docker-handbook/) and [CI-CD](docs/CI-CD.md)
 
 ## Issues & Suggestions
 
@@ -52,8 +67,6 @@ If any issues and suggestions to me, you can create an [issue](https://github.co
 - [Donate](https://www.paypal.me/pradyumnakrishna)
 
 <h2></h2>
-<sup>*Image file smaller than 2 MB or medium resolution not more than 2000 Pixels. If unsupported file uploaded then
-error occurs.</sup>
 
 [Build-Badge]:          https://www.travis-ci.com/PradyumnaKrishna/Facial-AI.svg?branch=main
 

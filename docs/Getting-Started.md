@@ -39,7 +39,7 @@ Facial-AI
 - **`Procfile`**: Stores configuration data, Heroku configuration for deploy this application.
 - **`requirements.txt`**: Contains `python` libraries required for this web application to run.
 
-**Next: [The Web Application](The%20Web%20Application.md)**
+**Next: [Setup](Setup)**
 
 <h2></h2>
 <sup>*Not including readmes or license files.</sup>

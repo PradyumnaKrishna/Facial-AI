@@ -1,5 +1,7 @@
 FROM tensorflow/tensorflow:2.4.1
+LABEL org.opencontainers.image.source=https://github.com/PradyumnaKrishna/Facial-AI
 LABEL MAINTAINER="Pradyumna Krishna"
+
 
 COPY . /app
 WORKDIR /app
