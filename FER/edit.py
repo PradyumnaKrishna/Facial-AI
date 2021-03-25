@@ -1,6 +1,8 @@
 import cv2
 import base64
 import numpy as np
+import matplotlib.pyplot as plt
+
 from FER.predict import Model
 
 
@@ -56,16 +58,32 @@ def edit_image(img, rect):
 
     # Convert image into 48x48 and predict Emotion
     roi = cv2.resize(fc, (48, 48))
-    emotion = predictor.predict_emotion(roi[np.newaxis, :, :, np.newaxis])
+    emotion, preds = predictor.predict_emotion(roi[np.newaxis, :, :, np.newaxis])
+    plot(predictor.EMOTIONS_LIST, preds)
 
     # Draw Rectangle and Write Emotion
     cv2.putText(img, emotion, (x, y), font, 1, (0, 255, 255), 2)
     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
 
+def plot(emotions, preds):
+    # plotting a bar chart
+    plt.switch_backend('Agg')
+    plt.bar(emotions, preds)
+
+    plt.ylim(0, 1)
+    # naming the axis
+    plt.ylabel('Probability')
+    plt.xlabel('Emotions')
+    # plot title
+    plt.title('Graphical Visualization')
+    plt.savefig('plot.png')
+
 # ----------------------------------------------------------------------------------
 # Read and Write Process for image
 # ----------------------------------------------------------------------------------
+
+
 def rw_image(file):
     # Read image
     image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)

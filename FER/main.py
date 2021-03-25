@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, flash, redirect
+
 from FER.edit import rw_image
 
 fer = Blueprint('fer', __name__)
