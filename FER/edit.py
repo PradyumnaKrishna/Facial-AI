@@ -74,10 +74,10 @@ def edit_image(img, faces):
         preds.append(pred)
 
         # Draw Rectangle and Write Text
-        cv2.putText(img, emotion, (x, y - 4), font, font_size, (0, 255, 255), 2)
-        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 165, 255), 2)
-        cv2.putText(img, str(i), (x + 2, y + h - 4), font,
-                    font_size, (237, 162, 0), 2)
+        cv2.putText(img, emotion, (x, y-4), font, font_size, (0, 255, 255), 2)
+        cv2.putText(img, str(i), (x+2, y+h-4), font, font_size, (237, 162, 0), 2)
+        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 2)
+
         i += 1
 
     return preds
@@ -93,15 +93,19 @@ def plot(preds, width=0.8):
     # Emotion List
     emotions = Model.EMOTIONS_LIST
 
+    # no of Predictions
     n = len(preds)
+    # numpy array as long as no of emotions
     X = np.arange(len(emotions))
+    # width of a bar
+    width = width/n
 
     # plot bar graph for 'n' faces
-    bar = []
     for i in range(n):
-        # TODO: improve graph plot function
-        bar.append(plt.bar(X - width/2. + i/float(n)*width, preds[i],
-                   tick_label=emotions, width=width/float(n), align="edge"))
+        plt.bar(X + (i*width), preds[i], width=width, label=f'Face {i+1}')
+
+    # place the x ticks
+    plt.xticks(X + (n-1)*width/2, emotions)
 
     # y axis range
     plt.ylim(0, 1)
@@ -111,8 +115,7 @@ def plot(preds, width=0.8):
     plt.xlabel('Emotions')
 
     # Add Legend
-    face_nos = [f'Face {i+1}' for i in range(len(bar))]
-    plt.legend(bar, face_nos, loc='upper center', bbox_to_anchor=(0.5, 1.17),
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.17),
                fancybox=True, shadow=True, ncol=5)
 
     # Convert Graph into Numpy Array
