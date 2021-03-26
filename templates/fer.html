@@ -39,8 +39,17 @@
                     <strong>{{ message }}</strong>
                 </div>
                 {% if category == 'success' %}
-                    <div>
-                        <img src=" {{ image_to_show }}" alt="Predicted">
+                    <div class="container" style="width: 100%;">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <h2>Prediction</h2>
+                                <img src=" {{ image_to_show }}" alt="Predicted" style="max-width: 100%;">
+                            </div>
+                            <div class="col-xs-6">
+                                <h2>Graphical Representation</h2>
+                                <img src="{{ graph_to_show }}" alt="Probability" style="max-width: 100%;">
+                            </div>
+                        </div>
                     </div>
                 {% endif %}
             {% endfor %}
