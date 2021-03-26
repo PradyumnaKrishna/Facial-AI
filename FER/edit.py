@@ -1,7 +1,9 @@
-import cv2
 import base64
-import numpy as np
+import cv2
+import io
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 from FER.predict import Model
 
@@ -42,32 +44,43 @@ def detect_faces(img):
 # Write Emotion on Image
 # according to given (x, y) coordinates and given width and height
 # ----------------------------------------------------------------------------------
-def edit_image(img, coords, preds=[]):
+def edit_image(img, faces):
     """ Draw a rectangle(s) on the image and write their suitable emotions """
-    (x, y, w, h) = coords
-
     # Load the Model
     predictor = Model("FER/model.json", "FER/model_weights.h5")
 
-    # Text Modification
+    # Font type
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_size = h/300 if h/300 > 0.6 else 0.6
 
     # Convert image into Grayscale
     gray_fr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Select only Face
-    fc = gray_fr[y:y + h, x:x + w]
+    preds = []
+    i = 1
 
-    # Convert image into 48x48 and predict Emotion
-    roi = cv2.resize(fc, (48, 48))
-    emotion, pred = predictor.predict_emotion(
-        roi[np.newaxis, :, :, np.newaxis])
-    preds.append(pred)
+    for coords in faces:
+        (x, y, w, h) = coords
 
-    # Draw Rectangle and Write Emotion
-    cv2.putText(img, emotion, (x, y-2), font, font_size, (0, 255, 255), 2)
-    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 165, 255), 2)
+        # Text Modification
+        font_size = h/300 if h/300 > 0.6 else 0.6
+
+        # Select only Face
+        fc = gray_fr[y:y + h, x:x + w]
+
+        # Convert image into 48x48 and predict Emotion
+        roi = cv2.resize(fc, (48, 48))
+        emotion, pred = predictor.predict_emotion(
+            roi[np.newaxis, :, :, np.newaxis])
+        preds.append(pred)
+
+        # Draw Rectangle and Write Text
+        cv2.putText(img, emotion, (x, y - 4), font, font_size, (0, 255, 255), 2)
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 165, 255), 2)
+        cv2.putText(img, str(i), (x + 2, y + h - 4), font,
+                    font_size, (237, 162, 0), 2)
+        i += 1
+
+    return preds
 
 
 # ----------------------------------------------------------------------------------
@@ -76,14 +89,17 @@ def edit_image(img, coords, preds=[]):
 def plot(preds, width=0.8):
     """ plotting a bar chart of prediction probability """
     plt.switch_backend('Agg')
+
+    # Emotion List
     emotions = Model.EMOTIONS_LIST
 
     n = len(preds)
-    X = np.arange(len(emotions))
+    X = np.arange(n)
 
     # plot bar graph for 'n' faces
     bar = []
     for i in range(n):
+        # TODO: improve graph plot function
         bar.append(plt.bar(X - width/2. + i/float(n)*width, preds[i],
                    tick_label=emotions, width=width/float(n), align="edge"))
 
@@ -94,15 +110,22 @@ def plot(preds, width=0.8):
     plt.ylabel('Probability')
     plt.xlabel('Emotions')
 
-    # Add title
-    plt.title('Graphical Visualization')
-
     # Add Legend
     face_nos = [f'Face {i+1}' for i in range(len(bar))]
-    plt.legend(bar, face_nos)
+    plt.legend(bar, face_nos, loc='upper center', bbox_to_anchor=(0.5, 1.17),
+               fancybox=True, shadow=True, ncol=5)
 
-    # Save the image
-    plt.savefig('plot.png')
+    # Convert Graph into Numpy Array
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    graph_arr = np.frombuffer(buf.getvalue(), dtype=np.uint8)
+    buf.close()
+
+    # Encode the graph into base64
+    graph = base64.encodebytes(graph_arr)
+    graph = 'data:image/png;base64, ' + str(graph, 'utf-8')
+    return graph
 
 
 # ----------------------------------------------------------------------------------
@@ -124,18 +147,12 @@ def rw_image(file):
     # Detect faces
     faces = detect_faces(image)
 
-    # predictions
-    preds = []
-
     # If no face detected return 0 and None
     if len(faces) == 0:
-        return 0, None
+        return 0, None, None
     else:
-        # Edit the image
-        for coords in faces:
-            # Call by value
-            edit_image(image, coords, preds)
-        plot(preds)
+        # Edit the image using call by value and store probabilities
+        preds = edit_image(image, faces)
 
         # Save
         # cv2.imwrite(filename, image)
@@ -143,6 +160,9 @@ def rw_image(file):
         # Process Image for Printing
         image_content = cv2.imencode('.jpg', image)[1].tostring()
         encoded_image = base64.encodebytes(image_content)
-        to_send = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
+        image = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
 
-        return len(faces), to_send
+        # plot graph for prediction probabilities
+        graph = plot(preds)
+
+        return len(faces), image, graph

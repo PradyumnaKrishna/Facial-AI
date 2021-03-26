@@ -9,8 +9,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
 # Check for the file uploaded is an image
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(name):
+    return '.' in name and name.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 # Main Page
@@ -32,9 +32,10 @@ def upload_file():
         return redirect(request.url)
 
     # Check for the file uploaded and is an image
+    # TODO: Improve file type check
     if file and allowed_file(file.filename):
         # Takes the No of faces and Edited Image
-        num_faces, to_send = rw_image(file)
+        num_faces, image, graph = rw_image(file)
 
         # If No of faces 0 then print 'No Face Detected'
         if num_faces == 0:
@@ -44,7 +45,8 @@ def upload_file():
         # Else Print No of Faces and the image
         else:
             flash('Yes! ' + str(num_faces) + ' face(s) detected!', 'success')
-            return render_template('fer.html', image_to_show=to_send)
+            return render_template('fer.html', image_to_show=image,
+                                   graph_to_show=graph)
 
     # If not an image
     else:
