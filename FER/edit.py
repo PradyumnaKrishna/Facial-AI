@@ -94,7 +94,7 @@ def plot(preds, width=0.8):
     emotions = Model.EMOTIONS_LIST
 
     n = len(preds)
-    X = np.arange(n)
+    X = np.arange(len(emotions))
 
     # plot bar graph for 'n' faces
     bar = []
