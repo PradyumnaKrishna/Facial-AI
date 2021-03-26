@@ -1,6 +1,4 @@
-# Importing Libraries
 import numpy as np
-import tensorflow as tf
 
 from tensorflow.keras.models import model_from_json
 
@@ -26,8 +24,3 @@ class Model(object):
 
         emotion = self.loaded_model.predict(img)
         return Model.EMOTIONS_LIST[np.argmax(emotion)], emotion[0]
-
-    def probable_emotion(self, img):
-
-        preds = self.loaded_model.predict(img)
-        return preds[0]
