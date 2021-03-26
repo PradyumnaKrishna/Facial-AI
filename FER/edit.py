@@ -14,24 +14,24 @@ def detect_faces(img):
 
     faces_list = []
 
-    # Convert the test image to gray scale (opencv face detector expects gray images)
+    # Convert the image into gray scale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Load OpenCV face detector (LBP is faster)
-    face_cascade = cv2.CascadeClassifier('FER/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier(
+        'FER/haarcascade_frontalface_default.xml')
 
     # Detect multiple faces (some images may be closer to camera than others)
     # result is a list of faces
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+    faces = face_cascade.detectMultiScale(
+        gray, scaleFactor=1.2, minNeighbors=5)
 
     # If not face detected, return empty list
     if len(faces) == 0:
         return faces_list
 
     for i in range(0, len(faces)):
-        (x, y, w, h) = faces[i]
-        face_dict = {'face': gray[y:y + w, x:x + h], 'rect': faces[i]}
-        faces_list.append(face_dict)
+        faces_list.append(faces[i])
 
     # Return the face image area and the face rectangle
     return faces_list
@@ -42,13 +42,16 @@ def detect_faces(img):
 # Write Emotion on Image
 # according to given (x, y) coordinates and given width and height
 # ----------------------------------------------------------------------------------
-def edit_image(img, rect):
-    """Draw a rectangle(s) on the image and write their suitable emotions"""
-    (x, y, w, h) = rect
+def edit_image(img, coords, preds=[]):
+    """ Draw a rectangle(s) on the image and write their suitable emotions """
+    (x, y, w, h) = coords
 
     # Load the Model
     predictor = Model("FER/model.json", "FER/model_weights.h5")
+
+    # Text Modification
     font = cv2.FONT_HERSHEY_SIMPLEX
+    font_size = h/300 if h/300 > 0.6 else 0.6
 
     # Convert image into Grayscale
     gray_fr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -58,35 +61,48 @@ def edit_image(img, rect):
 
     # Convert image into 48x48 and predict Emotion
     roi = cv2.resize(fc, (48, 48))
-    emotion, preds = predictor.predict_emotion(roi[np.newaxis, :, :, np.newaxis])
-    plot(predictor.EMOTIONS_LIST, preds)
+    emotion, pred = predictor.predict_emotion(
+        roi[np.newaxis, :, :, np.newaxis])
+    preds.append(pred)
 
     # Draw Rectangle and Write Emotion
-    cv2.putText(img, emotion, (x, y), font, 1, (0, 255, 255), 2)
-    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 2)
+    cv2.putText(img, emotion, (x, y-2), font, font_size, (0, 255, 255), 2)
+    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 165, 255), 2)
 
 
-def plot(emotions, preds):
+# ----------------------------------------------------------------------------------
+# Plot the Graph for Analysis
+# ----------------------------------------------------------------------------------
+def plot(preds, width=0.8):
     # plotting a bar chart
     plt.switch_backend('Agg')
-    plt.bar(emotions, preds)
+    emotions = Model.EMOTIONS_LIST
+
+    n = len(preds)
+    X = np.arange(len(emotions))
+
+    for i in range(n):
+        plt.bar(X - width/2. + i/float(n)*width, preds[i],
+                tick_label=emotions, width=width/float(n), align="edge")
 
     plt.ylim(0, 1)
+
     # naming the axis
     plt.ylabel('Probability')
     plt.xlabel('Emotions')
+
     # plot title
     plt.title('Graphical Visualization')
     plt.savefig('plot.png')
 
+
 # ----------------------------------------------------------------------------------
 # Read and Write Process for image
 # ----------------------------------------------------------------------------------
-
-
 def rw_image(file):
     # Read image
-    image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
+    image = cv2.imdecode(np.fromstring(
+        file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
 
     # Resizing Factor
     f1, f2 = 1200 / image.shape[1], 600 / image.shape[0]
@@ -99,13 +115,18 @@ def rw_image(file):
     # Detect faces
     faces = detect_faces(image)
 
+    # predictions
+    preds = []
+
     # If no face detected return 0 and None
     if len(faces) == 0:
         return 0, None
     else:
         # Edit the image
-        for item in faces:
-            edit_image(image, item['rect'])
+        for coords in faces:
+            # Call by value
+            edit_image(image, coords, preds)
+            plot(preds)
 
         # Save
         # cv2.imwrite(filename, image)

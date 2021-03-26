@@ -1,5 +1,4 @@
 import main
-import sys
 import unittest
 
 get = {
@@ -27,16 +26,9 @@ class Test(unittest.TestCase):
             with open(file, 'rb') as img:
                 r = client.post('/FER/', data={'image': img})
                 self.assertEqual(r.status_code, response)
-        
+
         r = client.post('/FER/')
         print(r.status_code)
-
-        try:
-            if str(sys.argv[1]) == 'run':
-                print("running server")
-                main.app.run()
-        except IndexError:
-            return
 
 
 if __name__ == "__main__":
