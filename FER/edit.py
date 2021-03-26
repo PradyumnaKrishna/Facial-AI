@@ -74,25 +74,34 @@ def edit_image(img, coords, preds=[]):
 # Plot the Graph for Analysis
 # ----------------------------------------------------------------------------------
 def plot(preds, width=0.8):
-    # plotting a bar chart
+    """ plotting a bar chart of prediction probability """
     plt.switch_backend('Agg')
     emotions = Model.EMOTIONS_LIST
 
     n = len(preds)
     X = np.arange(len(emotions))
 
+    # plot bar graph for 'n' faces
+    bar = []
     for i in range(n):
-        plt.bar(X - width/2. + i/float(n)*width, preds[i],
-                tick_label=emotions, width=width/float(n), align="edge")
+        bar.append(plt.bar(X - width/2. + i/float(n)*width, preds[i],
+                   tick_label=emotions, width=width/float(n), align="edge"))
 
+    # y axis range
     plt.ylim(0, 1)
 
     # naming the axis
     plt.ylabel('Probability')
     plt.xlabel('Emotions')
 
-    # plot title
+    # Add title
     plt.title('Graphical Visualization')
+
+    # Add Legend
+    face_nos = [f'Face {i+1}' for i in range(len(bar))]
+    plt.legend(bar, face_nos)
+
+    # Save the image
     plt.savefig('plot.png')
 
 
@@ -126,7 +135,7 @@ def rw_image(file):
         for coords in faces:
             # Call by value
             edit_image(image, coords, preds)
-            plot(preds)
+        plot(preds)
 
         # Save
         # cv2.imwrite(filename, image)
