@@ -8,16 +8,34 @@ import numpy as np
 from FER.predict import Model
 
 
+def process_image(file):
+    image = cv2.imdecode(np.fromstring(
+        file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
+
+    # Resizing Factor
+    f1, f2 = 1200 / image.shape[1], 600 / image.shape[0]
+    f = min(f1, f2, 1)
+
+    # Resize Image
+    dim = (int(image.shape[1] * f), int(image.shape[0] * f))
+    image = cv2.resize(image, dim)
+
+    return image
+
+
 # ----------------------------------------------------------------------------------
 # Detect faces using OpenCV
 # ----------------------------------------------------------------------------------
-def detect_faces(img):
+def detect_faces(file):
     """Detect face(s) in an image"""
 
-    faces_list = []
+    faces_dict = {}
+
+    # Read image
+    image = process_image(file)
 
     # Convert the image into gray scale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Load OpenCV face detector (LBP is faster)
     face_cascade = cv2.CascadeClassifier(
@@ -30,13 +48,35 @@ def detect_faces(img):
 
     # If not face detected, return empty list
     if len(faces) == 0:
-        return faces_list
+        return faces_dict
+
+    coords = ['x', 'y', 'w', 'h']
 
     for i in range(0, len(faces)):
-        faces_list.append(faces[i])
+        faces_dict[i] = {'coordinates': dict(zip(coords, faces[i].tolist()))}
 
     # Return the face image area and the face rectangle
-    return faces_list
+    return faces_dict, gray
+
+
+def predict(faces_dict, img):
+    """ Draw a rectangle(s) on the image and write their suitable emotions """
+    # Load the Model
+    predictor = Model("FER/model.json", "FER/model_weights.h5")
+    emotions = predictor.EMOTIONS_LIST
+
+    for f, d in faces_dict.items():
+        (x, y, w, h) = d['coordinates'].values()
+
+        # Select only Face
+        fc = img[y:y + h, x:x + w]
+
+        # Convert image into 48x48 and predict Emotion
+        roi = cv2.resize(fc, (48, 48))
+        emotion, pred = predictor.predict_emotion(
+            roi[np.newaxis, :, :, np.newaxis])
+        faces_dict[f]['emotion'] = emotion
+        faces_dict[f]['probability'] = dict(zip(emotions, pred.tolist()))
 
 
 # ----------------------------------------------------------------------------------
