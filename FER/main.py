@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, flash, redirect
+from flask import Blueprint, flash, redirect, render_template, request
+import imghdr
 
 from FER.edit import rw_image
 
@@ -9,8 +10,9 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
 # Check for the file uploaded is an image
-def allowed_file(name):
-    return '.' in name and name.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(file):
+    image_type = imghdr.what(None, file.read())
+    return image_type in ALLOWED_EXTENSIONS
 
 
 # Main Page
@@ -32,8 +34,10 @@ def upload_file():
         return redirect(request.url)
 
     # Check for the file uploaded and is an image
-    # TODO: Improve file type check
-    if file and allowed_file(file.filename):
+    if file and allowed_file(file):
+        # because imghdr.what() reads file to end, must set file's position 0.
+        file.seek(0)
+
         # Takes the No of faces and Edited Image
         num_faces, image, graph = rw_image(file)
 
@@ -50,7 +54,7 @@ def upload_file():
 
     # If not an image
     else:
-        flash('Please upload supported formats, e.g. png, jpg or jpeg', 'danger')
+        flash('Please upload a valid image, e.g. png, jpg or jpeg', 'danger')
         return redirect(request.url)
 
     # Save file
