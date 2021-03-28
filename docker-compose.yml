@@ -4,6 +4,9 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=development
     ports: 
       - 5000:5000
     volumes: 

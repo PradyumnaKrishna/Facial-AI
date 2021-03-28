@@ -1,5 +1,8 @@
-import main
+import json
 import unittest
+
+import main
+from FER.edit import edit_image
 
 get = {
     '/': 302,
@@ -8,27 +11,40 @@ get = {
 }
 
 test = {
-    'test/octocat.jpg': 302,
+    'test/not_a_img.jpg': 400,
+    'test/octocat.jpg': 200,
     'test/jon_snow.jpg': 200,
 }
+
+api_url = '/FER/api/v1/'
 
 
 class Test(unittest.TestCase):
 
-    def test_index(self):
+    def test_frontend(self):
         main.app.testing = True
         client = main.app.test_client()
 
         for link, response in get.items():
             self.assertEqual(client.get(link).status_code, response)
 
-        for file, response in test.items():
-            with open(file, 'rb') as img:
-                r = client.post('/FER/', data={'image': img})
-                self.assertEqual(r.status_code, response)
+        # No test for post
 
-        r = client.post('/FER/')
-        print(r.status_code)
+    def test_api(self):
+        main.app.testing = True
+        client = main.app.test_client()
+
+        self.assertEqual(client.post(api_url).status_code, 400)
+
+        for file, response in test.items():
+            r = client.post(api_url, data={'image': open(file, 'rb')})
+            self.assertEqual(r.status_code, response)
+
+    def test_functions(self):
+        image = open('test/jon_snow.jpg', 'rb')
+        data = json.load(open('test/jon_snow.json'))
+
+        edit_image(image, data['data'])
 
 
 if __name__ == "__main__":
