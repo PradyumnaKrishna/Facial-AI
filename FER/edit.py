@@ -8,7 +8,15 @@ import numpy as np
 from FER.predict import Model
 
 
+# ----------------------------------------------------------------------------------
+# Basic Processing/Conversions of image
+# ----------------------------------------------------------------------------------
 def process_image(file):
+    # because imghdr.what() reads file to end, must set file's position 0.
+    # some other function also reads the file to end
+    file.seek(0)
+
+    # Read Image
     image = cv2.imdecode(np.fromstring(
         file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
 
@@ -20,6 +28,7 @@ def process_image(file):
     dim = (int(image.shape[1] * f), int(image.shape[0] * f))
     image = cv2.resize(image, dim)
 
+    # Return Image
     return image
 
 
@@ -48,7 +57,7 @@ def detect_faces(file):
 
     # If not face detected, return empty list
     if len(faces) == 0:
-        return faces_dict
+        return faces, gray
 
     coords = ['x', 'y', 'w', 'h']
 
@@ -59,82 +68,18 @@ def detect_faces(file):
     return faces_dict, gray
 
 
-def predict(faces_dict, img):
-    """ Draw a rectangle(s) on the image and write their suitable emotions """
-    # Load the Model
-    predictor = Model("FER/model.json", "FER/model_weights.h5")
-    emotions = predictor.EMOTIONS_LIST
-
-    for f, d in faces_dict.items():
-        (x, y, w, h) = d['coordinates'].values()
-
-        # Select only Face
-        fc = img[y:y + h, x:x + w]
-
-        # Convert image into 48x48 and predict Emotion
-        roi = cv2.resize(fc, (48, 48))
-        emotion, pred = predictor.predict_emotion(
-            roi[np.newaxis, :, :, np.newaxis])
-        faces_dict[f]['emotion'] = emotion
-        faces_dict[f]['probability'] = dict(zip(emotions, pred.tolist()))
-
-
-# ----------------------------------------------------------------------------------
-# Draw rectangle on image
-# Write Emotion on Image
-# according to given (x, y) coordinates and given width and height
-# ----------------------------------------------------------------------------------
-def edit_image(img, faces):
-    """ Draw a rectangle(s) on the image and write their suitable emotions """
-    # Load the Model
-    predictor = Model("FER/model.json", "FER/model_weights.h5")
-
-    # Font type
-    font = cv2.FONT_HERSHEY_SIMPLEX
-
-    # Convert image into Grayscale
-    gray_fr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    preds = []
-    i = 1
-
-    for coords in faces:
-        (x, y, w, h) = coords
-
-        # Text Modification
-        font_size = h/300 if h/300 > 0.6 else 0.6
-
-        # Select only Face
-        fc = gray_fr[y:y + h, x:x + w]
-
-        # Convert image into 48x48 and predict Emotion
-        roi = cv2.resize(fc, (48, 48))
-        emotion, pred = predictor.predict_emotion(
-            roi[np.newaxis, :, :, np.newaxis])
-        preds.append(pred)
-
-        # Draw Rectangle and Write Text
-        cv2.putText(img, emotion, (x, y-4), font, font_size, (0, 255, 255), 2)
-        cv2.putText(img, str(i), (x+2, y+h-4), font, font_size, (237, 162, 0), 2)
-        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 165, 255), 2)
-
-        i += 1
-
-    return preds
-
-
 # ----------------------------------------------------------------------------------
 # Plot the Graph for Analysis
 # ----------------------------------------------------------------------------------
-def plot(preds, width=0.8):
+def plot(probs, width=0.8):
     """ plotting a bar chart of prediction probability """
     plt.switch_backend('Agg')
 
     # Emotion List
     emotions = Model.EMOTIONS_LIST
 
-    # no of Predictions
-    n = len(preds)
+    # no of Probabilities
+    n = len(probs)
     # numpy array as long as no of emotions
     X = np.arange(len(emotions))
     # width of a bar
@@ -142,7 +87,7 @@ def plot(preds, width=0.8):
 
     # plot bar graph for 'n' faces
     for i in range(n):
-        plt.bar(X + (i*width), preds[i], width=width, label=f'Face {i+1}')
+        plt.bar(X + (i*width), probs[i], width=width, label=f'Face {i}')
 
     # place the x ticks
     plt.xticks(X + (n-1)*width/2, emotions)
@@ -172,40 +117,69 @@ def plot(preds, width=0.8):
 
 
 # ----------------------------------------------------------------------------------
-# Read and Write Process for image
+# Predict Emotion for face(s)
 # ----------------------------------------------------------------------------------
-def rw_image(file):
-    # Read image
-    image = cv2.imdecode(np.fromstring(
-        file.read(), np.uint8), cv2.IMREAD_UNCHANGED)
+def predict(faces_dict, img):
+    """ Draw a rectangle(s) on the image and write their suitable emotions """
+    # Load the Model
+    predictor = Model("FER/model.json", "FER/model_weights.h5")
+    emotions = predictor.EMOTIONS_LIST
 
-    # Resizing Factor
-    f1, f2 = 1200 / image.shape[1], 600 / image.shape[0]
-    f = min(f1, f2, 1)
+    for f, detail in faces_dict.items():
+        # decalaring face coordiantes as variables
+        (x, y, w, h) = detail['coordinates'].values()
 
-    # Resize Image
-    dim = (int(image.shape[1] * f), int(image.shape[0] * f))
-    image = cv2.resize(image, dim)
+        # Select only Face
+        fc = img[y:y + h, x:x + w]
 
-    # Detect faces
-    faces = detect_faces(image)
+        # Convert image into 48x48 and predict Emotion
+        roi = cv2.resize(fc, (48, 48))
+        emotion, prob = predictor.predict_emotion(
+            roi[np.newaxis, :, :, np.newaxis])
 
-    # If no face detected return 0 and None
-    if len(faces) == 0:
-        return 0, None, None
-    else:
-        # Edit the image using call by value and store probabilities
-        preds = edit_image(image, faces)
+        # add emotion and probability to faces_dict
+        faces_dict[f]['emotion'] = emotion
+        faces_dict[f]['probability'] = dict(zip(emotions, prob.tolist()))
 
-        # Save
-        # cv2.imwrite(filename, image)
 
-        # Process Image for Printing
-        image_content = cv2.imencode('.jpg', image)[1].tostring()
-        encoded_image = base64.encodebytes(image_content)
-        image = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
+# ----------------------------------------------------------------------------------
+# Draw rectangle on image
+# Write Emotion on Image
+# according to given (x, y) coordinates and given width and height
+# ----------------------------------------------------------------------------------
+def edit_image(file, data):
+    """ Draw a rectangle(s) on the image and write their suitable emotions """
+    # Process Image
+    image = process_image(file)
 
-        # plot graph for prediction probabilities
-        graph = plot(preds)
+    probabilities = []
 
-        return len(faces), image, graph
+    # Font type
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    for i, detail in data.items():
+        # Variable Declaration
+        (h, w, x, y) = detail['coordinates'].values()
+        emotion = detail['emotion']
+
+        # Text Modification
+        font_size = h/300 if h/300 > 0.6 else 0.6
+
+        # Draw Rectangle and Write Text
+        cv2.putText(image, emotion, (x, y-4), font, font_size, (0, 255, 255), 2)
+        cv2.putText(image, i, (x+2, y+h-4), font, font_size, (237, 162, 0), 2)
+        cv2.rectangle(image, (x, y), (x+w, y+h), (0, 165, 255), 2)
+
+        # append probabilities
+        probabilities.append(detail['probability'].values())
+
+    # Convert Image into base64
+    image_content = cv2.imencode('.jpg', image)[1].tostring()
+    encoded_image = base64.encodebytes(image_content)
+    image = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
+
+    # Plot Graph
+    graph = plot(probabilities)
+
+    # Return Image and Graph
+    return image, graph
