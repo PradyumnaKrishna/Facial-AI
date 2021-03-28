@@ -80,7 +80,7 @@ def api():
             # return json response
             return jsonify({'message': f'Yes! {len(faces)} face(s) detected!',
                             'data': faces}), 200
-    
+
     # If not an image
     return jsonify({
         'message': 'Please upload a valid image, e.g. png, jpg or jpeg'}), 400
