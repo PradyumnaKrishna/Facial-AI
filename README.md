@@ -34,6 +34,12 @@ To get started:
 
 Read more information or instructions about the setup at [docs](docs/Setup.md).
 
+## API Reference
+
+Recently, Created an API `/FER/api/v1/`. Send a request using curl, postman or you favoraite language sdk containing upload
+a file, and get a json response with face coordiantes, emotion predicted, and probability of guessed emotion. Read more
+about this api at [docs](docs/API.md).
+
 ## Hosted on Azure App Service
 
 Google App Engine Flexible isn't free that's why I moved to Azure App Service. Again it gave the ability to run it and

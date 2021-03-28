@@ -28,5 +28,5 @@ If there is no error and image get uploaded successfully, web application predic
     <img alt="Prediction" src="img/Prediction.png">
 </p>
 
-**Back: [Getting Started](Setup.md)**<br>
+**Back: [API Refernce](API.md)**<br>
 **Next: [Continuous Integration and Continuous Delivery](CI-CD.md)**
