@@ -15,7 +15,6 @@ api_url = 'http://127.0.0.1:5000/FER/api/v1/'
 # Check for the file uploaded is an image
 def allowed_file(file):
     image_type = imghdr.what(None, file.read())
-    print("DUBUG: ", image_type, image_type in ALLOWED_EXTENSIONS)
     return image_type in ALLOWED_EXTENSIONS
 
 
